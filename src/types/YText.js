@@ -164,6 +164,11 @@ const updateCurrentAttributes = (currentAttributes, format) => {
   const { key, value } = format
   if (value === null) {
     currentAttributes.delete(key)
+  // @ts-ignore
+  } else if (value['data-coding-id']) {
+    // FIXME unique attribute names for nested coding marks
+    // @ts-ignore
+    currentAttributes.set(`coding-${value['data-coding-id']}`, value)
   } else {
     currentAttributes.set(key, value)
   }
