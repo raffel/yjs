@@ -25,6 +25,44 @@ build collaborative or distributed applications ping us at
 <yjs@tag1consulting.com>. Otherwise you can find help on our
 [discussion board](https://discuss.yjs.dev).
 
+## Sponsors
+
+I'm currently looking for sponsors that allow me to be less dependent on
+contracting work. These awesome backers already fund further development of
+Yjs:
+
+[![Vincent Waller](https://github.com/vwall.png?size=60)](https://github.com/vwall)
+[<img src="https://user-images.githubusercontent.com/5553757/83337333-a7bcb380-a2ba-11ea-837b-e404eb35d318.png"
+height="60px" />](https://input.com/)
+[![Duane Johnson](https://github.com/canadaduane.png?size=60)](https://github.com/canadaduane)
+[![Joe Reeve](https://github.com/ISNIT0.png?size=60)](https://github.com/ISNIT0)
+[<img src="https://room.sh/img/icons/android-chrome-192x192.png" height="60px" />](https://room.sh/)
+[![JourneyApps](https://github.com/journeyapps.png?size=60)](https://github.com/journeyapps)
+[![Adam Brunnmeier](https://github.com/adabru.png?size=60)](https://github.com/adabru)
+[![Nathanael Anderson](https://github.com/NathanaelA.png?size=60)](https://github.com/NathanaelA)
+[![Gremloon](https://github.com/gremloon.png?size=60)](https://github.com/gremloon)
+
+Sponsorship also comes with special perks! [![Become a Sponsor](https://img.shields.io/static/v1?label=Become%20a%20Sponsor&message=%E2%9D%A4&logo=GitHub&style=flat&color=d42f2d)](https://github.com/sponsors/dmonad)
+
+## Who is using Yjs
+
+* [Relm](http://www.relm.us/) A collaborative gameworld for teamwork and
+  community. :star2:
+* [Input](https://input.com/) A collaborative note taking app. :star2:
+* [Room.sh](https://room.sh/) A meeting application with integrated
+  collaborative drawing, editing, and coding tools. :star:
+* [http://coronavirustechhandbook.com/](https://coronavirustechhandbook.com/)
+  A collaborative wiki that is edited by thousands of different people to work
+  on a rapid and sophisticated response to the coronavirus outbreak and
+  subsequent impacts. :star:
+* [Nimbus Note](https://nimbusweb.me/note.php) A note-taking app designed by
+  Nimbus Web.
+* [JoeDocs](https://joedocs.com/) An open collaborative wiki.
+* [Pluxbox RadioManager](https://pluxbox.com/) A web-based app to
+  collaboratively organize radio broadcasts.
+* [Cattaz](http://cattaz.io/) A wiki that can run custom applications in the
+  wiki pages.
+
 ## Table of Contents
 
 * [Overview](#Overview)
@@ -137,6 +175,54 @@ Now you understand how types are defined on a shared document. Next you can jump
 to the [demo repository](https://github.com/yjs/yjs-demos) or continue reading
 the API docs.
 
+### Example: Using and combining providers
+
+Any of the Yjs providers can be combined with each other. So you can sync data
+over different network technologies.
+
+In most cases you want to use a network provider (like y-websocket or y-webrtc)
+in combination with a persistence provider (y-indexeddb in the browser).
+Persistence allows you to load the document faster and to persist data that is
+created while offline.
+
+For the sake of this demo we combine two different network providers with a
+persistence provider.
+
+```js
+import * as Y from 'yjs'
+import { WebrtcProvider } from 'y-webrtc'
+import { WebsocketProvider } from 'y-websocket'
+import { IndexeddbPersistence } from 'y-indexeddb'
+
+const ydoc = new Y.Doc()
+
+// this allows you to instantly get the (cached) documents data
+const indexeddbProvider = new IndexeddbPersistence('count-demo', ydoc)
+idbP.whenSynced.then(() => {
+  console.log('loaded data from indexed db')
+})
+
+// Sync clients with the y-webrtc provider.
+const webrtcProvider = new WebrtcProvider('count-demo', ydoc)
+
+// Sync clients with the y-websocket provider
+const websocketProvider = new WebsocketProvider(
+  'wss://demos.yjs.dev', 'count-demo', ydoc
+)
+
+// array of numbers which produce a sum
+const yarray = ydoc.getArray('count')
+
+// observe changes of the sum
+yarray.observe(event => {
+  // print updates when the data changes
+  console.log('new sum: ' + yarray.toArray().reduce((a,b) => a + b))
+})
+
+// add 1 to the sum
+yarray.push([1]) // => "new sum: 1"
+```
+
 ## API
 
 ```js
@@ -158,10 +244,12 @@ necessary.
     <b><code>insert(index:number, content:Array&lt;object|boolean|Array|string|number|Uint8Array|Y.Type&gt;)</code></b>
     <dd>
 Insert content at <var>index</var>. Note that content is an array of elements.
-I.e. <code>array.insert(0, [1]</code> splices the list and inserts 1 at
+I.e. <code>array.insert(0, [1])</code> splices the list and inserts 1 at
 position 0.
     </dd>
     <b><code>push(Array&lt;Object|boolean|Array|string|number|Uint8Array|Y.Type&gt;)</code></b>
+    <dd></dd>
+    <b><code>unshift(Array&lt;Object|boolean|Array|string|number|Uint8Array|Y.Type&gt;)</code></b>
     <dd></dd>
     <b><code>delete(index:number, length:number)</code></b>
     <dd></dd>
@@ -308,8 +396,12 @@ YTextEvents compute changes as deltas.
     <dd></dd>
     <b><code>format(index:number, length:number, formattingAttributes:Object&lt;string,string&gt;)</code></b>
     <dd>Assign formatting attributes to a range in the text</dd>
-    <b><code>applyDelta(delta)</code></b>
-    <dd>See <a href="https://quilljs.com/docs/delta/">Quill Delta</a></dd>
+    <b><code>applyDelta(delta, opts:Object&lt;string,any&gt;)</code></b>
+    <dd>
+        See <a href="https://quilljs.com/docs/delta/">Quill Delta</a>
+        Can set options for preventing remove ending newLines, default is true.
+        <pre>ytext.applyDelta(delta, { sanitize: false })</pre>
+    </dd>
     <b><code>length:number</code></b>
     <dd></dd>
     <b><code>toString():string</code></b>
@@ -645,7 +737,7 @@ Yjs ships with an Undo/Redo manager for selective undo/redo of of changes on a
 Yjs type. The changes can be optionally scoped to transaction origins.
 
 ```js
-const ytext = doc.getArray('array')
+const ytext = doc.getText('text')
 const undoManager = new Y.UndoManager(ytext)
 
 ytext.insert(0, 'abc')
@@ -717,7 +809,7 @@ UndoManager instance is always added to `trackedOrigins`.
 ```js
 class CustomBinding {}
 
-const ytext = doc.getArray('array')
+const ytext = doc.getText('text')
 const undoManager = new Y.UndoManager(ytext, {
   trackedOrigins: new Set([42, CustomBinding])
 })
@@ -757,7 +849,7 @@ additional meta information like the cursor location or the view on the
 document. You can assign meta-information to Undo-/Redo-StackItems.
 
 ```js
-const ytext = doc.getArray('array')
+const ytext = doc.getText('text')
 const undoManager = new Y.UndoManager(ytext, {
   trackedOrigins: new Set([42, CustomBinding])
 })
