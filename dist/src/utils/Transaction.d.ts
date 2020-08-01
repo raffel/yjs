@@ -43,19 +43,19 @@ export class Transaction {
      * Holds the state before the transaction started.
      * @type {Map<Number,Number>}
      */
-    beforeState: Map<Number, Number>;
+    beforeState: Map<number, number>;
     /**
      * Holds the state after the transaction.
      * @type {Map<Number,Number>}
      */
-    afterState: Map<Number, Number>;
+    afterState: Map<number, number>;
     /**
      * All types that were directly modified (property added or child
      * inserted/deleted). New types are not included in this Set.
      * Maps from type to parentSubs (`item.parentSub = null` for YArray)
      * @type {Map<AbstractType<YEvent>,Set<String|null>>}
      */
-    changed: Map<AbstractType<YEvent>, Set<String | null>>;
+    changed: Map<AbstractType<YEvent>, Set<string | null>>;
     /**
      * Stores the events for the types that observe also child elements.
      * It is mainly used by `observeDeep`.
@@ -63,9 +63,9 @@ export class Transaction {
      */
     changedParentTypes: Map<AbstractType<YEvent>, Array<YEvent>>;
     /**
-     * @type {Set<ID>}
+     * @type {Array<AbstractStruct>}
      */
-    _mergeStructs: Set<ID>;
+    _mergeStructs: Array<AbstractStruct>;
     /**
      * @type {any}
      */
@@ -90,7 +90,8 @@ import { Doc } from "./Doc.js";
 import { DeleteSet } from "./DeleteSet.js";
 import { AbstractType } from "../types/AbstractType.js";
 import { YEvent } from "./YEvent.js";
-import { ID } from "./ID.js";
+import { AbstractStruct } from "../structs/AbstractStruct.js";
 import * as encoding from "lib0/encoding";
+import { ID } from "./ID.js";
 import { StructStore } from "./StructStore.js";
 import { Item } from "../structs/Item.js";

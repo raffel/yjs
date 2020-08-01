@@ -932,13 +932,13 @@ export class YText extends AbstractType {
     }
     // snapshots are merged again after the transaction, so we need to keep the
     // transalive until we are done
-    transact(doc, transaction => {
-      if (snapshot) {
-        splitSnapshotAffectedStructs(transaction, snapshot)
-      }
-      if (prevSnapshot) {
-        splitSnapshotAffectedStructs(transaction, prevSnapshot)
-      }
+    // transact(doc, transaction => {
+      // if (snapshot) {
+      //   splitSnapshotAffectedStructs(transaction, snapshot)
+      // }
+      // if (prevSnapshot) {
+      //   splitSnapshotAffectedStructs(transaction, prevSnapshot)
+      // }
       while (n !== null) {
         if (isVisible(n, snapshot) || (prevSnapshot !== undefined && isVisible(n, prevSnapshot))) {
           switch (n.content.constructor) {
@@ -990,7 +990,7 @@ export class YText extends AbstractType {
         n = n.right
       }
       packStr()
-    }, splitSnapshotAffectedStructs)
+    // }, splitSnapshotAffectedStructs)
     return ops
   }
 

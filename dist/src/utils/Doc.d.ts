@@ -10,8 +10,8 @@ export class Doc extends Observable<string> {
      * @param {function(Item):boolean} [conf.gcFilter] Will be called before an Item is garbage collected. Return false to keep the Item.
      */
     constructor({ gc, gcFilter }?: {
-        gc?: boolean;
-        gcFilter?: (arg0: Item) => boolean;
+        gc: boolean;
+        gcFilter: (arg0: Item) => boolean;
     });
     gc: boolean;
     gcFilter: (arg0: Item) => boolean;
@@ -40,19 +40,19 @@ export class Doc extends Observable<string> {
      *
      * @public
      */
-    transact(f: (arg0: Transaction) => void, origin?: any): void;
+    public transact(f: (arg0: Transaction) => void, origin?: any): void;
     /**
-     * Define a shared data type.
+     * Get a shared data type by name. If it does not yet exist, define its type.
      *
      * Multiple calls of `y.get(name, TypeConstructor)` yield the same result
-     * and do not overwrite each other. I.e.
-     * `y.define(name, Y.Array) === y.define(name, Y.Array)`
+     * and do not overwrite each other, i.e.
+     *   `y.get(name, Y.Array) === y.get(name, Y.Array)`
      *
      * After this method is called, the type is also available on `y.share.get(name)`.
      *
      * *Best Practices:*
      * Define all types right after the Yjs instance is created and store them in a separate object.
-     * Also use the typed methods `getText(name)`, `getArray(name)`, ..
+     * Also use the typed methods `getText(name)`, `getArray(name)`, `getMap(name)`, etc.
      *
      * @example
      *   const y = new Y(..)
@@ -67,7 +67,7 @@ export class Doc extends Observable<string> {
      *
      * @public
      */
-    get(name: string, TypeConstructor?: Function): AbstractType<any>;
+    public get(name: string, TypeConstructor?: Function): AbstractType<any>;
     /**
      * @template T
      * @param {string} name
@@ -75,28 +75,28 @@ export class Doc extends Observable<string> {
      *
      * @public
      */
-    getArray<T>(name: string): YArray<T>;
+    public getArray<T>(name: string): YArray<T>;
     /**
      * @param {string} name
      * @return {YText}
      *
      * @public
      */
-    getText(name: string): YText;
+    public getText(name: string): YText;
     /**
      * @param {string} name
      * @return {YMap<any>}
      *
      * @public
      */
-    getMap(name: string): YMap<any>;
+    public getMap(name: string): YMap<any>;
     /**
      * @param {string} name
      * @return {YXmlFragment}
      *
      * @public
      */
-    getXmlFragment(name: string): YXmlFragment;
+    public getXmlFragment(name: string): YXmlFragment;
 }
 import * as random from "lib0/random";
 import { Observable } from "lib0/observable";

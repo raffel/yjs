@@ -16,34 +16,25 @@ export class YMapEvent<T> extends YEvent {
  * A shared Map implementation.
  *
  * @extends AbstractType<YMapEvent<T>>
- * @implements {IterableIterator}
+ * @implements {Iterable<T>}
  */
-export class YMap<T> extends AbstractType<YMapEvent<T>> {
+export class YMap<T> extends AbstractType<YMapEvent<T>> implements Iterable<T> {
+    /**
+     *
+     * @param {Iterable<readonly [string, any]>=} entries - an optional iterable to initialize the YMap
+     */
+    constructor(entries?: Iterable<readonly [string, any]> | undefined);
     /**
      * @type {Map<string,any>?}
      * @private
      */
-    _prelimContent: Map<string, any> | null;
+    private _prelimContent;
     /**
-     * Integrate this type into the Yjs instance.
+     * Returns the size of the YMap (count of key/value pairs)
      *
-     * * Save this struct in the os
-     * * This type is sent to other client
-     * * Observer functions are fired
-     *
-     * @param {Doc} y The Yjs instance
-     * @param {Item} item
+     * @return {number}
      */
-    _integrate(y: Doc, item: Item): void;
-    _copy(): YMap<any>;
-    /**
-     * Transforms this Shared Type to a JSON object.
-     *
-     * @return {Object<string,T>}
-     */
-    toJSON(): {
-        [x: string]: T;
-    };
+    get size(): number;
     /**
      * Returns the keys for each element in the YMap Type.
      *
@@ -63,7 +54,7 @@ export class YMap<T> extends AbstractType<YMapEvent<T>> {
      */
     entries(): IterableIterator<any>;
     /**
-     * Executes a provided function on once on overy key-value pair.
+     * Executes a provided function on once on every key-value pair.
      *
      * @param {function(T,string,YMap<T>):void} f A function to execute on every element of this YArray.
      */
@@ -73,7 +64,7 @@ export class YMap<T> extends AbstractType<YMapEvent<T>> {
     /**
      * @return {IterableIterator<T>}
      */
-    "__@iterator"(): IterableIterator<T>;
+    [Symbol.iterator](): IterableIterator<T>;
     /**
      * Remove a specified element from this YMap.
      *
@@ -106,6 +97,4 @@ export function readYMap(decoder: decoding.Decoder): YMap<any>;
 import { YEvent } from "../utils/YEvent.js";
 import { Transaction } from "../utils/Transaction.js";
 import { AbstractType } from "./AbstractType.js";
-import { Doc } from "../utils/Doc.js";
-import { Item } from "../structs/Item.js";
 import * as decoding from "lib0/decoding";

@@ -15,15 +15,14 @@ export class Item extends AbstractStruct {
      * @param {ID | null} origin
      * @param {Item | null} right
      * @param {ID | null} rightOrigin
-     * @param {AbstractType<any>} parent
+     * @param {AbstractType<any>|ID|null} parent Is a type if integrated, is null if it is possible to copy parent from left or right, is ID before integration to search for it.
      * @param {string | null} parentSub
      * @param {AbstractContent} content
      */
-    constructor(id: ID, left: Item | null, origin: ID | null, right: Item | null, rightOrigin: ID | null, parent: AbstractType<any>, parentSub: string | null, content: AbstractContent);
+    constructor(id: ID, left: Item | null, origin: ID | null, right: Item | null, rightOrigin: ID | null, parent: AbstractType<any> | ID | null, parentSub: string | null, content: AbstractContent);
     /**
      * The item that was originally to the left of this item.
      * @type {ID | null}
-     * @readonly
      */
     origin: ID | null;
     /**
@@ -38,25 +37,21 @@ export class Item extends AbstractStruct {
     right: Item | null;
     /**
      * The item that was originally to the right of this item.
-     * @readonly
      * @type {ID | null}
      */
     rightOrigin: ID | null;
     /**
-     * The parent type.
-     * @type {AbstractType<any>}
-     * @readonly
+     * @type {AbstractType<any>|ID|null}
      */
-    parent: AbstractType<any>;
+    parent: AbstractType<any> | ID | null;
     /**
      * If the parent refers to this item with some kind of key (e.g. YMap, the
      * key is specified here. The key is then used to refer to the list in which
      * to insert this item. If `parentSub = null` type._start is the list in
      * which to insert to. Otherwise it is `parent._map`.
      * @type {String | null}
-     * @readonly
      */
-    parentSub: String | null;
+    parentSub: string | null;
     /**
      * If this type's effect is reundone this type refers to the type that undid
      * this operation.
@@ -67,11 +62,22 @@ export class Item extends AbstractStruct {
      * @type {AbstractContent}
      */
     content: AbstractContent;
-    countable: boolean;
+    info: number;
+    set keep(arg: boolean);
     /**
      * If true, do not garbage collect this Item.
      */
-    keep: boolean;
+    get keep(): boolean;
+    get countable(): boolean;
+    markDeleted(): void;
+    /**
+     * Return the creator clientID of the missing op or define missing items and return null.
+     *
+     * @param {Transaction} transaction
+     * @param {StructStore} store
+     * @return {null | number}
+     */
+    getMissing(transaction: Transaction, store: StructStore): null | number;
     /**
      * Returns the next non-deleted item
      */
@@ -85,13 +91,6 @@ export class Item extends AbstractStruct {
      */
     get lastId(): ID;
     /**
-     * Try to merge two items
-     *
-     * @param {Item} right
-     * @return {boolean}
-     */
-    mergeWith(right: Item): boolean;
-    /**
      * Mark this Item as deleted.
      *
      * @param {Transaction} transaction
@@ -102,16 +101,6 @@ export class Item extends AbstractStruct {
      * @param {boolean} parentGCd
      */
     gc(store: StructStore, parentGCd: boolean): void;
-    /**
-     * Transform the properties of this type to binary and write it to an
-     * BinaryEncoder.
-     *
-     * This is called when this Item is sent to a remote peer.
-     *
-     * @param {encoding.Encoder} encoder The encoder to write data to.
-     * @param {number} offset
-     */
-    write(encoder: encoding.Encoder, offset: number): void;
 }
 /**
  * A lookup map for reading Item content.
@@ -130,7 +119,7 @@ export class AbstractContent {
     /**
      * @return {Array<any>}
      */
-    getContent(): any[];
+    getContent(): Array<any>;
     /**
      * Should return false if this Item is some kind of meta information
      * (e.g. format information).
@@ -178,65 +167,12 @@ export class AbstractContent {
      */
     getRef(): number;
 }
-/**
- * @private
- */
-export class ItemRef extends AbstractStructRef {
-    /**
-     * @param {decoding.Decoder} decoder
-     * @param {ID} id
-     * @param {number} info
-     */
-    constructor(decoder: decoding.Decoder, id: ID, info: number);
-    /**
-     * The item that was originally to the left of this item.
-     * @type {ID | null}
-     */
-    left: ID | null;
-    /**
-     * The item that was originally to the right of this item.
-     * @type {ID | null}
-     */
-    right: ID | null;
-    /**
-     * If parent = null and neither left nor right are defined, then we know that `parent` is child of `y`
-     * and we read the next string as parentYKey.
-     * It indicates how we store/retrieve parent from `y.share`
-     * @type {string|null}
-     */
-    parentYKey: string | null;
-    /**
-     * The parent type.
-     * @type {ID | null}
-     */
-    parent: ID | null;
-    /**
-     * If the parent refers to this item with some kind of key (e.g. YMap, the
-     * key is specified here. The key is then used to refer to the list in which
-     * to insert this item. If `parentSub = null` type._start is the list in
-     * which to insert to. Otherwise it is `parent._map`.
-     * @type {String | null}
-     */
-    parentSub: String | null;
-    /**
-     * @type {AbstractContent}
-     */
-    content: AbstractContent;
-    length: number;
-    /**
-     * @param {Transaction} transaction
-     * @param {StructStore} store
-     * @param {number} offset
-     * @return {Item|GC}
-     */
-    toStruct(transaction: Transaction, store: StructStore, offset: number): GC | Item;
-}
+export function readItem(decoder: decoding.Decoder, id: ID, info: number, doc: Doc): Item;
 import { StructStore } from "../utils/StructStore.js";
 import { ID } from "../utils/ID.js";
 import { Transaction } from "../utils/Transaction.js";
 import { AbstractStruct } from "./AbstractStruct.js";
 import { AbstractType } from "../types/AbstractType.js";
-import * as encoding from "lib0/encoding";
 import * as decoding from "lib0/decoding";
-import { AbstractStructRef } from "./AbstractStruct.js";
-import { GC } from "./GC.js";
+import * as encoding from "lib0/encoding";
+import { Doc } from "../utils/Doc.js";
