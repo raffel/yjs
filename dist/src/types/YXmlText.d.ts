@@ -22,6 +22,7 @@ export class YXmlText extends YText {
     public toDOM(_document?: Document | undefined, hooks?: {
         [x: string]: any;
     } | undefined, binding?: any): Text;
+    escapeXml(unsafe: any): any;
 }
 export function readYXmlText(decoder: decoding.Decoder): YXmlText;
 import { YText } from "./YText.js";

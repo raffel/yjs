@@ -7421,6 +7421,21 @@ class YXmlText extends YText {
     return dom
   }
 
+  // https://stackoverflow.com/questions/7918868/how-to-escape-xml-entities-in-javascript
+  // @ts-ignore
+  escapeXml (unsafe) {
+    // @ts-ignore
+    return unsafe.replace(/[<>&'"]/g, function (c) {
+        switch (c) {
+            case '<': return '&lt;';
+            case '>': return '&gt;';
+            case '&': return '&amp;';
+            case '\'': return '&apos;';
+            case '"': return '&quot;';
+        }
+    });
+  }
+
   toString () {
     // @ts-ignore
     return this.toDelta().map(delta => {
@@ -7447,7 +7462,7 @@ class YXmlText extends YText {
         }
         str += '>';
       }
-      str += delta.insert;
+      str += this.escapeXml(delta.insert);
       for (let i = nestedNodes.length - 1; i >= 0; i--) {
         str += `</${nestedNodes[i].nodeName}>`;
       }
