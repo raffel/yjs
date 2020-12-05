@@ -15,11 +15,9 @@ import {
   YArrayRefID,
   callTypeObservers,
   transact,
-  Doc, Transaction, Item // eslint-disable-line
+  ArraySearchMarker, AbstractUpdateDecoder, AbstractUpdateEncoder, Doc, Transaction, Item // eslint-disable-line
 } from '../internals.js'
-
-import * as decoding from 'lib0/decoding.js' // eslint-disable-line
-import * as encoding from 'lib0/encoding.js'
+import { typeListSlice } from './AbstractType.js'
 
 /**
  * Event that describes the changes on a YArray
@@ -50,6 +48,22 @@ export class YArray extends AbstractType {
      * @private
      */
     this._prelimContent = []
+    /**
+     * @type {Array<ArraySearchMarker>}
+     */
+    this._searchMarker = []
+  }
+
+  /**
+   * Construct a new YArray containing the specified items.
+   * @template T
+   * @param {Array<T>} items
+   * @return {YArray<T>}
+   */
+  static from (items) {
+    const a = new YArray()
+    a.push(items)
+    return a
   }
 
   /**
@@ -72,6 +86,17 @@ export class YArray extends AbstractType {
     return new YArray()
   }
 
+  /**
+   * @return {YArray<T>}
+   */
+  clone () {
+    const arr = new YArray()
+    arr.insert(0, this.toArray().map(el =>
+      el instanceof AbstractType ? el.clone() : el
+    ))
+    return arr
+  }
+
   get length () {
     return this._prelimContent === null ? this._length : this._prelimContent.length
   }
@@ -83,6 +108,7 @@ export class YArray extends AbstractType {
    * @param {Set<null|string>} parentSubs Keys changed on this type. `null` if list was modified.
    */
   _callObserver (transaction, parentSubs) {
+    super._callObserver(transaction, parentSubs)
     callTypeObservers(this, transaction, new YArrayEvent(this, transaction))
   }
 
@@ -166,6 +192,17 @@ export class YArray extends AbstractType {
   }
 
   /**
+   * Transforms this YArray to a JavaScript Array.
+   *
+   * @param {number} [start]
+   * @param {number} [end]
+   * @return {Array<T>}
+   */
+  slice (start = 0, end = this.length) {
+    return typeListSlice(this, start, end)
+  }
+
+  /**
    * Transforms this Shared Type to a JSON object.
    *
    * @return {Array<any>}
@@ -204,15 +241,15 @@ export class YArray extends AbstractType {
   }
 
   /**
-   * @param {encoding.Encoder} encoder
+   * @param {AbstractUpdateEncoder} encoder
    */
   _write (encoder) {
-    encoding.writeVarUint(encoder, YArrayRefID)
+    encoder.writeTypeRef(YArrayRefID)
   }
 }
 
 /**
- * @param {decoding.Decoder} decoder
+ * @param {AbstractUpdateDecoder} decoder
  *
  * @private
  * @function

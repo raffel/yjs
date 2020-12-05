@@ -1,9 +1,6 @@
 import {
-  Transaction, Item, StructStore // eslint-disable-line
+  AbstractUpdateDecoder, AbstractUpdateEncoder, Transaction, Item, StructStore // eslint-disable-line
 } from '../internals.js'
-
-import * as encoding from 'lib0/encoding.js'
-import * as decoding from 'lib0/decoding.js'
 
 /**
  * @private
@@ -54,6 +51,17 @@ export class ContentString {
   splice (offset) {
     const right = new ContentString(this.str.slice(offset))
     this.str = this.str.slice(0, offset)
+
+    // Prevent encoding invalid documents because of splitting of surrogate pairs: https://github.com/yjs/yjs/issues/248
+    const firstCharCode = this.str.charCodeAt(offset - 1)
+    if (firstCharCode >= 0xD800 && firstCharCode <= 0xDBFF) {
+      // Last character of the left split is the start of a surrogate utf16/ucs2 pair.
+      // We don't support splitting of surrogate pairs because this may lead to invalid documents.
+      // Replace the invalid character with a unicode replacement character (� / U+FFFD)
+      this.str = this.str.slice(0, offset - 1) + '�'
+      // replace right as well
+      right.str = '�' + right.str.slice(1)
+    }
     return right
   }
 
@@ -80,11 +88,11 @@ export class ContentString {
    */
   gc (store) {}
   /**
-   * @param {encoding.Encoder} encoder
+   * @param {AbstractUpdateEncoder} encoder
    * @param {number} offset
    */
   write (encoder, offset) {
-    encoding.writeVarString(encoder, offset === 0 ? this.str : this.str.slice(offset))
+    encoder.writeString(offset === 0 ? this.str : this.str.slice(offset))
   }
 
   /**
@@ -98,7 +106,7 @@ export class ContentString {
 /**
  * @private
  *
- * @param {decoding.Decoder} decoder
+ * @param {AbstractUpdateDecoder} decoder
  * @return {ContentString}
  */
-export const readContentString = decoder => new ContentString(decoding.readVarString(decoder))
+export const readContentString = decoder => new ContentString(decoder.readString())

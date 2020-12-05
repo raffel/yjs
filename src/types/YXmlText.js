@@ -1,8 +1,9 @@
 
-import { YText, YXmlTextRefID } from '../internals.js'
-
-import * as encoding from 'lib0/encoding.js'
-import * as decoding from 'lib0/decoding.js' // eslint-disable-line
+import {
+  YText,
+  YXmlTextRefID,
+  AbstractUpdateDecoder, AbstractUpdateEncoder // eslint-disable-line
+} from '../internals.js'
 
 /**
  * Represents text in a Dom Element. In the future this type will also handle
@@ -11,6 +12,15 @@ import * as decoding from 'lib0/decoding.js' // eslint-disable-line
 export class YXmlText extends YText {
   _copy () {
     return new YXmlText()
+  }
+
+  /**
+   * @return {YXmlText}
+   */
+  clone () {
+    const text = new YXmlText()
+    text.applyDelta(this.toDelta())
+    return text
   }
 
   /**
@@ -93,15 +103,15 @@ export class YXmlText extends YText {
   }
 
   /**
-   * @param {encoding.Encoder} encoder
+   * @param {AbstractUpdateEncoder} encoder
    */
   _write (encoder) {
-    encoding.writeVarUint(encoder, YXmlTextRefID)
+    encoder.writeTypeRef(YXmlTextRefID)
   }
 }
 
 /**
- * @param {decoding.Decoder} decoder
+ * @param {AbstractUpdateDecoder} decoder
  * @return {YXmlText}
  *
  * @private

@@ -31,27 +31,30 @@ I'm currently looking for sponsors that allow me to be less dependent on
 contracting work. These awesome backers already fund further development of
 Yjs:
 
-[![Vincent Waller](https://github.com/vwall.png?size=60)](https://github.com/vwall)
-[<img src="https://user-images.githubusercontent.com/5553757/83337333-a7bcb380-a2ba-11ea-837b-e404eb35d318.png"
-height="60px" />](https://input.com/)
-[![Duane Johnson](https://github.com/canadaduane.png?size=60)](https://github.com/canadaduane)
-[![Joe Reeve](https://github.com/ISNIT0.png?size=60)](https://github.com/ISNIT0)
-[<img src="https://room.sh/img/icons/android-chrome-192x192.png" height="60px" />](https://room.sh/)
+[![davidhq](https://github.com/davidhq.png?size=60)](https://github.com/davidhq)
+[![Ifiok Jr.](https://github.com/ifiokjr.png?size=60)](https://github.com/ifiokjr)
+[![Burke Libbey](https://github.com/burke.png?size=60)](https://github.com/burke)
+[![Beni Cherniavsky-Paskin](https://github.com/cben.png?size=60)](https://github.com/cben)
+[![Tom Moor](https://github.com/tommoor.png?size=60)](https://github.com/tommoor)
+[![Michael Meyers](https://github.com/michaelemeyers.png?size=60)](https://github.com/michaelemeyers)
+[![Cristiano Benjamin](https://github.com/csbenjamin.png?size=60)](https://github.com/csbenjamin)
+[![Braden](https://github.com/AdventureBeard.png?size=60)](https://github.com/AdventureBeard)
+[![nimbuswebinc](https://nimbusweb.me/new-style-img/note-icon.svg)](https://github.com/nimbuswebinc)
 [![JourneyApps](https://github.com/journeyapps.png?size=60)](https://github.com/journeyapps)
 [![Adam Brunnmeier](https://github.com/adabru.png?size=60)](https://github.com/adabru)
 [![Nathanael Anderson](https://github.com/NathanaelA.png?size=60)](https://github.com/NathanaelA)
-[![Gremloon](https://github.com/gremloon.png?size=60)](https://github.com/gremloon)
+[<img src="https://room.sh/img/icons/android-chrome-192x192.png" height="60px" />](https://room.sh/)
 
 Sponsorship also comes with special perks! [![Become a Sponsor](https://img.shields.io/static/v1?label=Become%20a%20Sponsor&message=%E2%9D%A4&logo=GitHub&style=flat&color=d42f2d)](https://github.com/sponsors/dmonad)
 
 ## Who is using Yjs
 
-* [Relm](http://www.relm.us/) A collaborative gameworld for teamwork and
+* [Relm](https://www.relm.us/) A collaborative gameworld for teamwork and
   community. :star2:
 * [Input](https://input.com/) A collaborative note taking app. :star2:
 * [Room.sh](https://room.sh/) A meeting application with integrated
   collaborative drawing, editing, and coding tools. :star:
-* [http://coronavirustechhandbook.com/](https://coronavirustechhandbook.com/)
+* [https://coronavirustechhandbook.com/](https://coronavirustechhandbook.com/)
   A collaborative wiki that is edited by thousands of different people to work
   on a rapid and sophisticated response to the coronavirus outbreak and
   subsequent impacts. :star:
@@ -75,8 +78,6 @@ Sponsorship also comes with special perks! [![Become a Sponsor](https://img.shie
   * [Document Updates](#Document-Updates)
   * [Relative Positions](#Relative-Positions)
   * [Y.UndoManager](#YUndoManager)
-* [Miscellaneous](#Miscellaneous)
-  * [Typescript Declarations](#Typescript-Declarations)
 * [Yjs CRDT Algorithm](#Yjs-CRDT-Algorithm)
 * [License and Author](#License-and-Author)
 
@@ -90,10 +91,10 @@ are implemented in separate modules.
 
 | Name | Cursors | Binding |  Demo |
 |---|:-:|---|---|
-| [ProseMirror](https://prosemirror.net/) &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; | ✔ | [y-prosemirror](http://github.com/yjs/y-prosemirror) | [demo](https://demos.yjs.dev/prosemirror/prosemirror.html) |
-| [Quill](https://quilljs.com/) | ✔ | [y-quill](http://github.com/yjs/y-quill) | [demo](https://demos.yjs.dev/quill/quill.html) |
-| [CodeMirror](https://codemirror.net/) | ✔ | [y-codemirror](http://github.com/yjs/y-codemirror) | [demo](https://demos.yjs.dev/codemirror/codemirror.html) |
-| [Monaco](https://microsoft.github.io/monaco-editor/) | ✔ | [y-monaco](http://github.com/yjs/y-monaco) | [demo](https://demos.yjs.dev/monaco/monaco.html) |
+| [ProseMirror](https://prosemirror.net/) &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; | ✔ | [y-prosemirror](https://github.com/yjs/y-prosemirror) | [demo](https://demos.yjs.dev/prosemirror/prosemirror.html) |
+| [Quill](https://quilljs.com/) | ✔ | [y-quill](https://github.com/yjs/y-quill) | [demo](https://demos.yjs.dev/quill/quill.html) |
+| [CodeMirror](https://codemirror.net/) | ✔ | [y-codemirror](https://github.com/yjs/y-codemirror) | [demo](https://demos.yjs.dev/codemirror/codemirror.html) |
+| [Monaco](https://microsoft.github.io/monaco-editor/) | ✔ | [y-monaco](https://github.com/yjs/y-monaco) | [demo](https://demos.yjs.dev/monaco/monaco.html) |
 
 ### Providers
 
@@ -103,7 +104,7 @@ manage all that for you and are the perfect starting point for your
 collaborative app.
 
 <dl>
-  <dt><a href="http://github.com/yjs/y-webrtc">y-webrtc</a></dt>
+  <dt><a href="https://github.com/yjs/y-webrtc">y-webrtc</a></dt>
   <dd>
 Propagates document updates peer-to-peer using WebRTC. The peers exchange
 signaling data over signaling servers. Publically available signaling servers
@@ -111,19 +112,19 @@ are available. Communication over the signaling servers can be encrypted by
 providing a shared secret, keeping the connection information and the shared
 document private.
   </dd>
-  <dt><a href="http://github.com/yjs/y-websocket">y-websocket</a></dt>
+  <dt><a href="https://github.com/yjs/y-websocket">y-websocket</a></dt>
   <dd>
 A module that contains a simple websocket backend and a websocket client that
 connects to that backend. The backend can be extended to persist updates in a
 leveldb database.
   </dd>
-  <dt><a href="http://github.com/yjs/y-indexeddb">y-indexeddb</a></dt>
+  <dt><a href="https://github.com/yjs/y-indexeddb">y-indexeddb</a></dt>
   <dd>
 Efficiently persists document updates to the browsers indexeddb database.
 The document is immediately available and only diffs need to be synced through the
 network provider.
   </dd>
-  <dt><a href="http://github.com/yjs/y-dat">y-dat</a></dt>
+  <dt><a href="https://github.com/yjs/y-dat">y-dat</a></dt>
   <dd>
 [WIP] Write document updates effinciently to the dat network using
 <a href="https://github.com/kappa-db/multifeed">multifeed</a>. Each client has
@@ -198,7 +199,7 @@ const ydoc = new Y.Doc()
 
 // this allows you to instantly get the (cached) documents data
 const indexeddbProvider = new IndexeddbPersistence('count-demo', ydoc)
-idbP.whenSynced.then(() => {
+indexeddbProvider.whenSynced.then(() => {
   console.log('loaded data from indexed db')
 })
 
@@ -255,6 +256,8 @@ position 0.
     <dd></dd>
     <b><code>get(index:number)</code></b>
     <dd></dd>
+    <b><code>slice(start:number, end:number):Array&lt;Object|boolean|Array|string|number|Uint8Array|Y.Type&gt;</code></b>
+    <dd>Retrieve a range of content</dd>
     <b><code>length:number</code></b>
     <dd></dd>
     <b>
@@ -320,6 +323,8 @@ or any of its children.
     <dd></dd>
     <b><code>get(index:number)</code></b>
     <dd></dd>
+    <b><code>clone():Y.Map</code></b>
+    <dd>Clone this type into a fresh Yjs type.</dd>
     <b><code>toJSON():Object&lt;string, Object|boolean|Array|string|number|Uint8Array&gt;</code></b>
     <dd>
 Copies the <code>[key,value]</code> pairs of this YMap to a new Object.It
@@ -451,8 +456,12 @@ or any of its children.
     <dd></dd>
     <b><code>get(index:number)</code></b>
     <dd></dd>
+    <b><code>slice(start:number, end:number):Array&lt;Y.XmlElement|Y.XmlText&gt;</code></b>
+    <dd>Retrieve a range of content</dd>
     <b><code>length:number</code></b>
     <dd></dd>
+    <b><code>clone():Y.XmlFragment</code></b>
+    <dd>Clone this type into a fresh Yjs type.</dd>
     <b><code>toArray():Array&lt;Y.XmlElement|Y.XmlText&gt;</code></b>
     <dd>Copies the children to a new Array.</dd>
     <b><code>toDOM():DocumentFragment</code></b>
@@ -512,6 +521,12 @@ content and be actually XML compliant.
     <dd></dd>
     <b><code>getAttributes(attributeName:string):Object&lt;string,string&gt;</code></b>
     <dd></dd>
+    <b><code>get(i:number):Y.XmlElement|Y.XmlText</code></b>
+    <dd>Retrieve the i-th element.</dd>
+    <b><code>slice(start:number, end:number):Array&lt;Y.XmlElement|Y.XmlText&gt;</code></b>
+    <dd>Retrieve a range of content</dd>
+    <b><code>clone():Y.XmlElement</code></b>
+    <dd>Clone this type into a fresh Yjs type.</dd>
     <b><code>toArray():Array&lt;Y.XmlElement|Y.XmlText&gt;</code></b>
     <dd>Copies the children to a new Array.</dd>
     <b><code>toDOM():Element</code></b>
@@ -571,6 +586,10 @@ triggers a single change event. <br>You can specify an optional <code>origin</co
 parameter that is stored on <code>transaction.origin</code> and
 <code>on('update', (update, origin) => ..)</code>.
   </dd>
+  <b><code>toJSON():any</code></b>
+  <dd>
+Converts the entire document into a js object, recursively traversing each yjs type.
+  </dd>
   <b><code>get(string, Y.[TypeClass]):[Type]</code></b>
   <dd>Define a shared type.</dd>
   <b><code>getArray(string):Y.Array</code></b>
@@ -597,6 +616,13 @@ peers. You can apply document updates in any order and multiple times.
   <dd>Emitted before each transaction.</dd>
   <b><code>on('afterTransaction', function(Y.Transaction, Y.Doc):void)</code></b>
   <dd>Emitted after each transaction.</dd>
+  <b><code>on('beforeAllTransactions', function(Y.Doc):void)</code></b>
+  <dd>
+Transactions can be nested (e.g. when an event within a transaction calls another
+transaction). Emitted before the first transaction.
+  </dd>
+  <b><code>on('afterAllTransactions', function(Y.Doc, Array&lt;Y.Transaction&gt;):void)</code></b>
+  <dd>Emitted after the last transaction is cleaned up.</dd>
 </dl>
 
 ### Document Updates
@@ -865,24 +891,6 @@ undoManager.on('stack-item-popped', event => {
 })
 ```
 
-## Miscellaneous
-
-### Typescript Declarations
-
-Yjs has type descriptions. But until [this
-ticket](https://github.com/Microsoft/TypeScript/issues/7546) is fixed, this is
-how you can make use of Yjs type declarations.
-
-```json
-{
-  "compilerOptions": {
-    "allowJs": true,
-    "checkJs": true,
-  },
-  "maxNodeModuleJsDepth": 5
-}
-```
-
 ## Yjs CRDT Algorithm
 
 *Conflict-free replicated data types* (CRDT) for collaborative editing are an
@@ -899,11 +907,14 @@ do not require a central source of truth.
 
 Yjs implements a modified version of the algorithm described in [this
 paper](https://www.researchgate.net/publication/310212186_Near_Real-Time_Peer-to-Peer_Shared_Editing_on_Extensible_Data_Types).
-I will eventually publish a paper that describes why this approach works so well
-in practice. Note: Since operations make up the document structure, we prefer
-the term *struct* now.
+This [article](https://blog.kevinjahns.de/are-crdts-suitable-for-shared-editing/)
+explains a simple optimization on the CRDT model and
+gives more insight about the performance characteristics in Yjs.
+More information about the specific implementation is available in
+[INTERNALS.md](./INTERNALS.md) and in
+[this walkthrough of the Yjs codebase](https://youtu.be/0l5XgnQ6rB4).
 
-CRDTs suitable for shared text editing suffer from the fact that they only grow
+CRDTs that suitable for shared text editing suffer from the fact that they only grow
 in size. There are CRDTs that do not grow in size, but they do not have the
 characteristics that are benificial for shared text editing (like intention
 preservation). Yjs implements many improvements to the original algorithm that
@@ -956,5 +967,6 @@ Yjs and all related projects are [**MIT licensed**](./LICENSE).
 Yjs is based on my research as a student at the [RWTH
 i5](http://dbis.rwth-aachen.de/). Now I am working on Yjs in my spare time.
 
-Fund this project by donating on [Patreon](https://www.patreon.com/dmonad) or
-hiring [me](https://github.com/dmonad) for professional support.
+Fund this project by donating on [GitHub Sponsors](https://github.com/sponsors/dmonad)
+or hiring [me](https://github.com/dmonad) as a contractor for your collaborative
+app.

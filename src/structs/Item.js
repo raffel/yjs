@@ -1,7 +1,5 @@
 
 import {
-  readID,
-  writeID,
   GC,
   getState,
   AbstractStruct,
@@ -19,18 +17,15 @@ import {
   readContentAny,
   readContentString,
   readContentEmbed,
+  readContentDoc,
   createID,
   readContentFormat,
   readContentType,
   addChangedTypeToTransaction,
-  Doc, ContentType, ContentDeleted, StructStore, ID, AbstractType, Transaction // eslint-disable-line
+  AbstractUpdateDecoder, AbstractUpdateEncoder, ContentType, ContentDeleted, StructStore, ID, AbstractType, Transaction // eslint-disable-line
 } from '../internals.js'
 
 import * as error from 'lib0/error.js'
-import * as encoding from 'lib0/encoding.js'
-import * as decoding from 'lib0/decoding.js'
-import * as maplib from 'lib0/map.js'
-import * as set from 'lib0/set.js'
 import * as binary from 'lib0/binary.js'
 
 /**
@@ -289,7 +284,29 @@ export class Item extends AbstractStruct {
      * @type {AbstractContent}
      */
     this.content = content
+    /**
+     * bit1: keep
+     * bit2: countable
+     * bit3: deleted
+     * bit4: mark - mark node as fast-search-marker
+     * @type {number} byte
+     */
     this.info = this.content.isCountable() ? binary.BIT2 : 0
+  }
+
+  /**
+   * This is used to mark the item as an indexed fast-search marker
+   *
+   * @type {boolean}
+   */
+  set marker (isMarked) {
+    if (((this.info & binary.BIT4) > 0) !== isMarked) {
+      this.info ^= binary.BIT4
+    }
+  }
+
+  get marker () {
+    return (this.info & binary.BIT4) > 0
   }
 
   /**
@@ -354,6 +371,9 @@ export class Item extends AbstractStruct {
     if (this.rightOrigin) {
       this.right = getItemCleanStart(transaction, this.rightOrigin)
       this.rightOrigin = this.right.id
+    }
+    if ((this.left && this.left.constructor === GC) || (this.right && this.right.constructor === GC)) {
+      this.parent = null
     }
     // only set parent if this shouldn't be garbage collected
     if (!this.parent) {
@@ -432,10 +452,14 @@ export class Item extends AbstractStruct {
             if (o.id.client < this.id.client) {
               left = o
               conflictingItems.clear()
-            }
-          } else if (o.origin !== null && itemsBeforeOrigin.has(getItem(transaction.doc.store, o.origin))) {
+            } else if (compareIDs(this.rightOrigin, o.rightOrigin)) {
+              // this and o are conflicting and point to the same integration points. The id decides which item comes first.
+              // Since this is to the left of o, we can break here
+              break
+            } // else, o might be integrated before an item that this conflicts with. If so, we will find it in the next iterations
+          } else if (o.origin !== null && itemsBeforeOrigin.has(getItem(transaction.doc.store, o.origin))) { // use getItem instead of getItemCleanEnd because we don't want / need to split items.
             // case 2
-            if (o.origin === null || !conflictingItems.has(getItem(transaction.doc.store, o.origin))) {
+            if (!conflictingItems.has(getItem(transaction.doc.store, o.origin))) {
               left = o
               conflictingItems.clear()
             }
@@ -482,7 +506,7 @@ export class Item extends AbstractStruct {
       this.content.integrate(transaction, this)
       // add parent to transaction.changed
       addChangedTypeToTransaction(transaction, /** @type {AbstractType<any>} */ (this.parent), this.parentSub)
-      if ((/** @type {AbstractType<any>} */ (this.parent)._item !== null && /** @type {AbstractType<any>} */ (this.parent)._item.deleted) || (this.right !== null && this.parentSub !== null)) {
+      if ((/** @type {AbstractType<any>} */ (this.parent)._item !== null && /** @type {AbstractType<any>} */ (this.parent)._item.deleted) || (this.parentSub !== null && this.right !== null)) {
         // delete if parent is deleted or if this is not the current attribute value of parent
         this.delete(transaction)
       }
@@ -567,8 +591,8 @@ export class Item extends AbstractStruct {
         parent._length -= this.length
       }
       this.markDeleted()
-      addToDeleteSet(transaction.deleteSet, this.id, this.length)
-      maplib.setIfUndefined(transaction.changed, parent, set.create).add(this.parentSub)
+      addToDeleteSet(transaction.deleteSet, this.id.client, this.id.clock, this.length)
+      addChangedTypeToTransaction(transaction, parent, this.parentSub)
       this.content.delete(transaction)
     }
   }
@@ -595,7 +619,7 @@ export class Item extends AbstractStruct {
    *
    * This is called when this Item is sent to a remote peer.
    *
-   * @param {encoding.Encoder} encoder The encoder to write data to.
+   * @param {AbstractUpdateEncoder} encoder The encoder to write data to.
    * @param {number} offset
    */
   write (encoder, offset) {
@@ -606,12 +630,12 @@ export class Item extends AbstractStruct {
       (origin === null ? 0 : binary.BIT8) | // origin is defined
       (rightOrigin === null ? 0 : binary.BIT7) | // right origin is defined
       (parentSub === null ? 0 : binary.BIT6) // parentSub is non-null
-    encoding.writeUint8(encoder, info)
+    encoder.writeInfo(info)
     if (origin !== null) {
-      writeID(encoder, origin)
+      encoder.writeLeftID(origin)
     }
     if (rightOrigin !== null) {
-      writeID(encoder, rightOrigin)
+      encoder.writeRightID(rightOrigin)
     }
     if (origin === null && rightOrigin === null) {
       const parent = /** @type {AbstractType<any>} */ (this.parent)
@@ -620,14 +644,14 @@ export class Item extends AbstractStruct {
         // parent type on y._map
         // find the correct key
         const ykey = findRootTypeKey(parent)
-        encoding.writeVarUint(encoder, 1) // write parentYKey
-        encoding.writeVarString(encoder, ykey)
+        encoder.writeParentInfo(true) // write parentYKey
+        encoder.writeString(ykey)
       } else {
-        encoding.writeVarUint(encoder, 0) // write parent id
-        writeID(encoder, parentItem.id)
+        encoder.writeParentInfo(false) // write parent id
+        encoder.writeLeftID(parentItem.id)
       }
       if (parentSub !== null) {
-        encoding.writeVarString(encoder, parentSub)
+        encoder.writeString(parentSub)
       }
     }
     this.content.write(encoder, offset)
@@ -635,26 +659,27 @@ export class Item extends AbstractStruct {
 }
 
 /**
- * @param {decoding.Decoder} decoder
+ * @param {AbstractUpdateDecoder} decoder
  * @param {number} info
  */
-const readItemContent = (decoder, info) => contentRefs[info & binary.BITS5](decoder)
+export const readItemContent = (decoder, info) => contentRefs[info & binary.BITS5](decoder)
 
 /**
  * A lookup map for reading Item content.
  *
- * @type {Array<function(decoding.Decoder):AbstractContent>}
+ * @type {Array<function(AbstractUpdateDecoder):AbstractContent>}
  */
 export const contentRefs = [
   () => { throw error.unexpectedCase() }, // GC is not ItemContent
-  readContentDeleted,
-  readContentJSON,
-  readContentBinary,
-  readContentString,
-  readContentEmbed,
-  readContentFormat,
-  readContentType,
-  readContentAny
+  readContentDeleted, // 1
+  readContentJSON, // 2
+  readContentBinary, // 3
+  readContentString, // 4
+  readContentEmbed, // 5
+  readContentFormat, // 6
+  readContentType, // 7
+  readContentAny, // 8
+  readContentDoc // 9
 ]
 
 /**
@@ -734,7 +759,7 @@ export class AbstractContent {
   }
 
   /**
-   * @param {encoding.Encoder} encoder
+   * @param {AbstractUpdateEncoder} encoder
    * @param {number} offset
    */
   write (encoder, offset) {
@@ -747,39 +772,4 @@ export class AbstractContent {
   getRef () {
     throw error.methodUnimplemented()
   }
-}
-
-/**
- * @param {decoding.Decoder} decoder
- * @param {ID} id
- * @param {number} info
- * @param {Doc} doc
- */
-export const readItem = (decoder, id, info, doc) => {
-  /**
-   * The item that was originally to the left of this item.
-   * @type {ID | null}
-   */
-  const origin = (info & binary.BIT8) === binary.BIT8 ? readID(decoder) : null
-  /**
-   * The item that was originally to the right of this item.
-   * @type {ID | null}
-   */
-  const rightOrigin = (info & binary.BIT7) === binary.BIT7 ? readID(decoder) : null
-  const canCopyParentInfo = (info & (binary.BIT7 | binary.BIT8)) === 0
-  const hasParentYKey = canCopyParentInfo ? decoding.readVarUint(decoder) === 1 : false
-  /**
-   * If parent = null and neither left nor right are defined, then we know that `parent` is child of `y`
-   * and we read the next string as parentYKey.
-   * It indicates how we store/retrieve parent from `y.share`
-   * @type {string|null}
-   */
-  const parentYKey = canCopyParentInfo && hasParentYKey ? decoding.readVarString(decoder) : null
-
-  return new Item(
-    id, null, origin, null, rightOrigin,
-    canCopyParentInfo && !hasParentYKey ? readID(decoder) : (parentYKey ? doc.get(parentYKey) : null), // parent
-    canCopyParentInfo && (info & binary.BIT6) === binary.BIT6 ? decoding.readVarString(decoder) : null, // parentSub
-    /** @type {AbstractContent} */ (readItemContent(decoder, info)) // item content
-  )
 }

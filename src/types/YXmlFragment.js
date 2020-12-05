@@ -14,11 +14,10 @@ import {
   YXmlFragmentRefID,
   callTypeObservers,
   transact,
-  Doc, ContentType, Transaction, Item, YXmlText, YXmlHook, Snapshot // eslint-disable-line
+  typeListGet,
+  typeListSlice,
+  AbstractUpdateDecoder, AbstractUpdateEncoder, Doc, ContentType, Transaction, Item, YXmlText, YXmlHook, Snapshot // eslint-disable-line
 } from '../internals.js'
-
-import * as encoding from 'lib0/encoding.js'
-import * as decoding from 'lib0/decoding.js' // eslint-disable-line
 
 /**
  * Define the elements to which a set of CSS queries apply.
@@ -149,6 +148,16 @@ export class YXmlFragment extends AbstractType {
 
   _copy () {
     return new YXmlFragment()
+  }
+
+  /**
+   * @return {YXmlFragment}
+   */
+  clone () {
+    const el = new YXmlFragment()
+    // @ts-ignore
+    el.insert(0, el.toArray().map(item => item instanceof AbstractType ? item.clone() : item))
+    return el
   }
 
   get length () {
@@ -320,20 +329,59 @@ export class YXmlFragment extends AbstractType {
   }
 
   /**
+   * Appends content to this YArray.
+   *
+   * @param {Array<YXmlElement|YXmlText>} content Array of content to append.
+   */
+  push (content) {
+    this.insert(this.length, content)
+  }
+
+  /**
+   * Preppends content to this YArray.
+   *
+   * @param {Array<YXmlElement|YXmlText>} content Array of content to preppend.
+   */
+  unshift (content) {
+    this.insert(0, content)
+  }
+
+  /**
+   * Returns the i-th element from a YArray.
+   *
+   * @param {number} index The index of the element to return from the YArray
+   * @return {YXmlElement|YXmlText}
+   */
+  get (index) {
+    return typeListGet(this, index)
+  }
+
+  /**
+   * Transforms this YArray to a JavaScript Array.
+   *
+   * @param {number} [start]
+   * @param {number} [end]
+   * @return {Array<YXmlElement|YXmlText>}
+   */
+  slice (start = 0, end = this.length) {
+    return typeListSlice(this, start, end)
+  }
+
+  /**
    * Transform the properties of this type to binary and write it to an
    * BinaryEncoder.
    *
    * This is called when this Item is sent to a remote peer.
    *
-   * @param {encoding.Encoder} encoder The encoder to write data to.
+   * @param {AbstractUpdateEncoder} encoder The encoder to write data to.
    */
   _write (encoder) {
-    encoding.writeVarUint(encoder, YXmlFragmentRefID)
+    encoder.writeTypeRef(YXmlFragmentRefID)
   }
 }
 
 /**
- * @param {decoding.Decoder} decoder
+ * @param {AbstractUpdateDecoder} decoder
  * @return {YXmlFragment}
  *
  * @private

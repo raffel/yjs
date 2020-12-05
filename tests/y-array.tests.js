@@ -8,6 +8,33 @@ import * as math from 'lib0/math.js'
 /**
  * @param {t.TestCase} tc
  */
+export const testBasicUpdate = tc => {
+  const doc1 = new Y.Doc()
+  const doc2 = new Y.Doc()
+  doc1.getArray('array').insert(0, ['hi'])
+  const update = Y.encodeStateAsUpdate(doc1)
+  Y.applyUpdate(doc2, update)
+  t.compare(doc2.getArray('array').toArray(), ['hi'])
+}
+
+/**
+ * @param {t.TestCase} tc
+ */
+export const testSlice = tc => {
+  const doc1 = new Y.Doc()
+  const arr = doc1.getArray('array')
+  arr.insert(0, [1, 2, 3])
+  t.compareArrays(arr.slice(0), [1, 2, 3])
+  t.compareArrays(arr.slice(1), [2, 3])
+  t.compareArrays(arr.slice(0, -1), [1, 2])
+  arr.insert(0, [0])
+  t.compareArrays(arr.slice(0), [0, 1, 2, 3])
+  t.compareArrays(arr.slice(0, 2), [0, 1])
+}
+
+/**
+ * @param {t.TestCase} tc
+ */
 export const testDeleteInsert = tc => {
   const { users, array0 } = init(tc, { users: 2 })
   array0.delete(0, 0)
@@ -193,6 +220,34 @@ export const testInsertAndDeleteEventsForTypes = tc => {
 }
 
 /**
+ * This issue has been reported in https://discuss.yjs.dev/t/order-in-which-events-yielded-by-observedeep-should-be-applied/261/2
+ *
+ * Deep observers generate multiple events. When an array added at item at, say, position 0,
+ * and item 1 changed then the array-add event should fire first so that the change event
+ * path is correct. A array binding might lead to an inconsistent state otherwise.
+ *
+ * @param {t.TestCase} tc
+ */
+export const testObserveDeepEventOrder = tc => {
+  const { array0, users } = init(tc, { users: 2 })
+  /**
+   * @type {Array<any>}
+   */
+  let events = []
+  array0.observeDeep(e => {
+    events = e
+  })
+  array0.insert(0, [new Y.Map()])
+  users[0].transact(() => {
+    array0.get(0).set('a', 'a')
+    array0.insert(0, [0])
+  })
+  for (let i = 1; i < events.length; i++) {
+    t.assert(events[i - 1].path.length <= events[i].path.length, 'path size increases, fire top-level events first')
+  }
+}
+
+/**
  * @param {t.TestCase} tc
  */
 export const testChangeEvent = tc => {
@@ -335,23 +390,26 @@ const arrayTransactions = [
     const yarray = user.getArray('array')
     var uniqueNumber = getUniqueNumber()
     var content = []
-    var len = prng.int31(gen, 1, 4)
+    var len = prng.int32(gen, 1, 4)
     for (var i = 0; i < len; i++) {
       content.push(uniqueNumber)
     }
-    var pos = prng.int31(gen, 0, yarray.length)
+    var pos = prng.int32(gen, 0, yarray.length)
+    const oldContent = yarray.toArray()
     yarray.insert(pos, content)
+    oldContent.splice(pos, 0, ...content)
+    t.compareArrays(yarray.toArray(), oldContent) // we want to make sure that fastSearch markers insert at the correct position
   },
   function insertTypeArray (user, gen) {
     const yarray = user.getArray('array')
-    var pos = prng.int31(gen, 0, yarray.length)
+    var pos = prng.int32(gen, 0, yarray.length)
     yarray.insert(pos, [new Y.Array()])
     var array2 = yarray.get(pos)
     array2.insert(0, [1, 2, 3, 4])
   },
   function insertTypeMap (user, gen) {
     const yarray = user.getArray('array')
-    var pos = prng.int31(gen, 0, yarray.length)
+    var pos = prng.int32(gen, 0, yarray.length)
     yarray.insert(pos, [new Y.Map()])
     var map = yarray.get(pos)
     map.set('someprop', 42)
@@ -362,17 +420,20 @@ const arrayTransactions = [
     const yarray = user.getArray('array')
     var length = yarray.length
     if (length > 0) {
-      var somePos = prng.int31(gen, 0, length - 1)
-      var delLength = prng.int31(gen, 1, math.min(2, length - somePos))
+      var somePos = prng.int32(gen, 0, length - 1)
+      var delLength = prng.int32(gen, 1, math.min(2, length - somePos))
       if (prng.bool(gen)) {
         var type = yarray.get(somePos)
         if (type.length > 0) {
-          somePos = prng.int31(gen, 0, type.length - 1)
-          delLength = prng.int31(gen, 0, math.min(2, type.length - somePos))
+          somePos = prng.int32(gen, 0, type.length - 1)
+          delLength = prng.int32(gen, 0, math.min(2, type.length - somePos))
           type.delete(somePos, delLength)
         }
       } else {
+        const oldContent = yarray.toArray()
         yarray.delete(somePos, delLength)
+        oldContent.splice(somePos, delLength)
+        t.compareArrays(yarray.toArray(), oldContent)
       }
     }
   }
@@ -381,8 +442,8 @@ const arrayTransactions = [
 /**
  * @param {t.TestCase} tc
  */
-export const testRepeatGeneratingYarrayTests4 = tc => {
-  applyRandomTests(tc, arrayTransactions, 4)
+export const testRepeatGeneratingYarrayTests6 = tc => {
+  applyRandomTests(tc, arrayTransactions, 6)
 }
 
 /**
